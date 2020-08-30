@@ -1,0 +1,36 @@
+#cloud-config
+autoinstall:
+  version: 1
+  early-commands:
+    - systemctl stop ssh # otherwise packer tries to connect and exceed max attempts
+  locale: en_US
+  keyboard:
+    layout: en
+  ssh:
+    install-server: true
+    allow-pw: true
+  packages:
+    - qemu-guest-agent
+    - cloud-init
+    - vim
+  storage:
+    layout:
+      name: direct
+    swap:
+      size: 0
+  user-data:
+    package_upgrade: true
+    users:
+      - name: foobar
+        plain_text_passwd: foobarbazqux
+        groups: [adm, cdrom, dip, plugdev, lxd, sudo]
+        lock-passwd: false
+        sudo: ALL=(ALL) NOPASSWD:ALL
+        shell: /bin/bash
+    write-files:
+      - path: /tmp/foo
+        content: |
+          "bar"
+    preserve_hostname: false
+    manage_etc_hosts: false
+    hostname: "foobar"

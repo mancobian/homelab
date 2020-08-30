@@ -1,0 +1,11 @@
+# Homelab
+.img/
+.env
+
+# Kubernetes
+k8s/kube-system/certs/
+
+# Terraform
+.terraform/
+**/*.tfstate*
+**/tf.out
