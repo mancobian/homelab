@@ -1,6 +1,0 @@
-#cloud-config
-hostname: ${hostname}
-domain: ${domain}
-runcmd:
-  - truncate -s 0 /etc/hostname
-  - echo "${hostname}" >> /etc/hostname

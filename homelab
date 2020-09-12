@@ -1,0 +1,47 @@
+#!/bin/bash
+# https://yetiops.net/posts/proxmox-terraform-cloudinit-saltstack-prometheus/#creating-a-template
+
+source ${ROOTDIR}/.env
+
+VERSION=0.0.1
+
+function do_setup() {
+    # Copy installation files to the remote server
+    rsync -arvzP \
+        ${ROOTDIR}/.env \
+        ${ROOTDIR}/cfg/ \
+        ${ROOTDIR}/cmd/setup/ \
+        ${PROXMOX_USER}@${PROXMOX_HOST}:${SERVER_ROOT_DIR}
+
+    # Create template VM on the remote server and cleanup
+    ssh ${PROXMOX_USER}@${PROXMOX_HOST} "${SERVER_ROOT_DIR}/setup.sh; rm -rf ${SERVER_ROOT_DIR}"
+}
+
+function do_teardown() {
+    ${ROOTDIR}/cmd/teardown/teardown.sh
+}
+
+function print_usage() {
+    echo "Homelab v${VERSION}"
+    echo "Usage: $(basename "$0") [setup|teardown]" 
+    exit 0
+}
+
+ARGV=$@
+if [ "x$ARGV" = "x" ]; then
+    ARGV="-h"
+fi
+
+case $ARGV in
+setup)
+    do_setup
+    exit 0
+    ;;
+teardown)
+    do_teardown
+    exit 0
+    ;;
+*)
+    print_usage
+    ;;
+esac
