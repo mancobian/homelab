@@ -42,7 +42,7 @@ function create-k8s-nodes {
             qm set ${VMID} \
                 --ciuser "${CI_USER}" \
                 --cipassword "${CI_PASSWORD}" \
-                --citype "${CI_TYPE}" \
+                --citype "nocloud" \
                 --nameserver "${NAME_SERVER}" \
                 --searchdomain "${SEARCH_DOMAIN}" \
                 --ipconfig0 "ip=dhcp" \
