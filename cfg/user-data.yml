@@ -8,6 +8,9 @@ chpasswd:
 packages:
   - qemu-guest-agent
   - vim
+runcmd:
+  - systemctl start qemu-guest-agent
+  - netplan apply
 snap:
   commands:
     - snap install microk8s --classic

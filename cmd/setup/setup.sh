@@ -14,7 +14,7 @@ function create-template-vm {
 
     qm status ${TEMPLATE_VMID}
     if [ $? -ne 0 ]; then
-        qm create ${TEMPLATE_VMID} --memory 2048 --net0 virtio,bridge=vmbr0 --name ubuntu
+        qm create ${TEMPLATE_VMID} --memory 2048 --net0 virtio,bridge=vmbr0 --agent 1 --name ubuntu
         # import the downloaded disk to local storage
         qm importdisk ${TEMPLATE_VMID} /tmp/${UBUNTU_RELEASE}.img data
         # finally attach the new disk to the VM as scsi drive
@@ -38,7 +38,7 @@ function create-k8s-nodes {
             envsubst < user-data.yml > /var/lib/vz/snippets/user-data-${VMID}.yml
             qm clone ${TEMPLATE_VMID} ${VMID} \
                 --full false \
-                --name ${HOSTNAME}; \
+                --name ${HOSTNAME}; 
             qm set ${VMID} \
                 --ciuser "${CI_USER}" \
                 --cipassword "${CI_PASSWORD}" \
@@ -48,9 +48,9 @@ function create-k8s-nodes {
                 --ipconfig0 "ip=dhcp" \
                 --cicustom "user=local:snippets/user-data-${VMID}.yml" \
                 --cores 4 \
-                --memory 24000; \
-            qm resize ${VMID} scsi0 100G
-            qm start ${VMID}
+                --memory 24000; 
+            qm resize ${VMID} scsi0 100G; 
+            qm start ${VMID}; 
         fi
     done
 }
