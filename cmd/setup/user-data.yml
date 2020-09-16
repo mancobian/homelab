@@ -1,0 +1,35 @@
+#cloud-config
+hostname: ${HOSTNAME}
+manage_etc_hosts: false
+package_upgrade: true
+fqdn: ${HOSTNAME}.kludge.city
+chpasswd:
+  expire: False
+packages:
+  - qemu-guest-agent
+  - vim
+runcmd:
+  - systemctl start qemu-guest-agent
+  - netplan apply
+  - chown -R ${CI_USER}:${CI_USER} /home/${CI_USER}/.ssh
+snap:
+  commands:
+    - snap install microk8s --classic --channel=1.18/stable
+users:
+  - name: ${CI_USER}
+    plain_text_passwd: ${CI_PASSWORD}
+    groups: [adm, cdrom, dip, plugdev, lxd, sudo]
+    lock-passwd: false
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    shell: /bin/bash
+    ssh_authorized_keys:
+      - ${CI_PUBLIC_KEY}
+write_files:
+  - path: /home/${CI_USER}/.ssh/id_rsa.pub
+    permissions: '0644'
+    content: ${CI_PUBLIC_KEY}
+  - path: /home/${CI_USER}/.ssh/id_rsa
+    permissions: '0600'
+    content: |
+${CI_PRIVATE_KEY}
+    
