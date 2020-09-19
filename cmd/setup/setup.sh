@@ -46,9 +46,9 @@ function create-k8s-nodes {
                 --searchdomain "${SEARCH_DOMAIN}" \
                 --ipconfig0 "ip=dhcp" \
                 --cicustom "user=local:snippets/user-data-${VMID}.yml" \
-                --cores 4 \
-                --memory 24000; 
-            qm resize ${VMID} scsi0 100G; 
+                --cores ${CORES} \
+                --memory ${MEMORY}; 
+            qm resize ${VMID} scsi0 ${DISK}; 
             qm start ${VMID}; 
         fi
     done
@@ -66,13 +66,16 @@ function wait-for-guest-agents {
 
 function create-k8s-cluster {
     local MASTER=""
-    local WORKERS=()
+    local NODES=()
 
     for file in *.cfg; do
         source ${file}
         case "${ROLE}" in
+            data)
+                NODES+=(${HOSTNAME})
+                ;;
             worker)
-                WORKERS+=(${HOSTNAME})
+                NODES+=(${HOSTNAME})
                 ;;
             master)
                 MASTER=${HOSTNAME}
@@ -82,8 +85,10 @@ function create-k8s-cluster {
         esac
     done
 
-    for WORKER in ${WORKERS}; do
-        ssh -o 'StrictHostKeyChecking no' ${CI_USER}@${WORKER}.${SEARCH_DOMAIN} -- sudo $(ssh -o 'StrictHostKeyChecking no' ${CI_USER}@${MASTER}.${SEARCH_DOMAIN} sudo microk8s add-node | grep 'Join node with' | sed 's/Join node with: //' | tr -d '\n')
+    ssh-keygen -f ~/.ssh/known_hosts -R ${MASTER}.${SEARCH_DOMAIN}
+    for NODE in ${NODES[@]}; do
+        ssh-keygen -f ~/.ssh/known_hosts -R ${NODE}.${SEARCH_DOMAIN}
+        ssh -o 'StrictHostKeyChecking no' ${CI_USER}@${NODE}.${SEARCH_DOMAIN} -- sudo $(ssh -o 'StrictHostKeyChecking no' ${CI_USER}@${MASTER}.${SEARCH_DOMAIN} sudo microk8s add-node | grep 'Join node with' | sed 's/Join node with: //' | tr -d '\n')
     done
 }
 
