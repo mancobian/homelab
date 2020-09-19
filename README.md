@@ -17,13 +17,13 @@ Create a multi-node Kubernetes cluster on a single server in a [Proxmox Virtual 
 # K8s Cluster Specs
 - Master (x1)
   - CPU: 4 cores
-  - RAM: 16 GB
+  - RAM: 32 GB
 - Worker (x3)
   - CPU: 2 cores
   - RAM: 8 GB
 - Data (x1)
-  - CPU: 2 cores
-  - RAM: 8 GB
+  - CPU: 4 cores
+  - RAM: 16 GB
 
 # Commands
 - `make install` - Install `homelab` 
