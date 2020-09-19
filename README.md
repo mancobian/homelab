@@ -1,12 +1,27 @@
 # Overview
-This repo is intended to automate the creation of a multi-node Kubernetes cluster in a [Proxmox Virtual Environment](https://www.proxmox.com).
+Create a multi-node Kubernetes cluster on a single server in a [Proxmox Virtual Environment](https://www.proxmox.com).
 
-# Setup
-- Configure passwordless SSH from your dev box to the Proxmox server
+# Server Specs
+- CPU: 32 x Intel(R) Xeon(R) CPU E5-2640 v3 @ 2.60GHz (2 Sockets)
+- RAM: 128 GB
+- Disk 
+  - local-zfs 
+    - Content: Disk Image, Container
+    - Type: ZFS, Mirror
+    - Size: 500 GB (x2)
+  - data
+    - Content: Disk Image, Container
+    - Type: ZFS, Mirror
+    - Size: 2 TB (x2)
 
-# Scripts
-- `./scripts/setup.sh` - Create a K8s cluster
-- `./scripts/teardown.sh` - Destroys the K8s cluster
+# Commands
+- `make install` - Install `homelab` 
+- `homelab setup` - Setup `homelab` resources
+- `homelab teardown` - Teardown `homelab` resources
 
-# Todo
-- Preprocess the cloud-init user-data file to support use of envvars
+# References
+- The Engineer's Workshop, ["LVM, Thin Provisioning, and Monitoring Storage Use: A Case Study"](https://engineerworkshop.com/blog/lvm-thin-provisioning-and-monitoring-storage-use-a-case-study/)
+- YouTube, ["Creating a template in Proxmox Virtual Environment with cloud-init support"](https://www.youtube.com/watch?v=8qwnXd1yRK4&ab_channel=LearnLinuxTV) - cloud-init networking workaround
+- LinkedIn, ["Lost SSH Key? Cloud-init is the answer"](https://www.linkedin.com/pulse/lost-ssh-key-cloud-init-answer-himanshoo-wadhwa/)
+- cloudinit.co, ["How to Set Up SSH Keys on Ubuntu 18.04"](https://cloudinit.co/how-to-set-up-ssh-keys-on-ubuntu-18-04/)
+- learnk8s.com, ["Architecting Kubernetes clusters — choosing a worker node size"](https://learnk8s.io/kubernetes-node-size)

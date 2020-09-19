@@ -1,10 +1,5 @@
 #!/bin/bash
 
-# https://engineerworkshop.com/blog/lvm-thin-provisioning-and-monitoring-storage-use-a-case-study/ - proxmox thin-provisioning
-# https://www.youtube.com/watch?v=8qwnXd1yRK4&ab_channel=LearnLinuxTV - cloud-init networking workaround
-# https://cloudinit.co/how-to-set-up-ssh-keys-on-ubuntu-18-04/ - ssh key management
-# https://www.linkedin.com/pulse/lost-ssh-key-cloud-init-answer-himanshoo-wadhwa/ - cloud-init ssh key recovery
-
 # Populate environment variables
 cd "${0%/*}"
 source .env
