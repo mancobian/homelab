@@ -10,11 +10,11 @@ deps:
 install: export ROOTDIR = $(DESTDIR)$(PREFIX)/opt/homelab
 install: deps homelab
 	@mkdir -p $(DESTDIR)$(PREFIX)/bin
-	@envsubst '$$ROOTDIR' < homelab > $(DESTDIR)$(PREFIX)/bin/homelab
+	@envsubst '$$ROOTDIR,$$CI_PUBLIC_KEY,$$CI_PRIVATE_KEY' < homelab > $(DESTDIR)$(PREFIX)/bin/homelab
 	@chmod +x $(DESTDIR)$(PREFIX)/bin/homelab
 	@mkdir -p $(ROOTDIR)
 	@cp .env $(ROOTDIR)
-	@cp -R cmd cfg $(ROOTDIR)
+	@cp -R cfg cmd $(ROOTDIR)
 
 .PHONY: uninstall
 uninstall: export ROOTDIR = $(DESTDIR)$(PREFIX)/opt/homelab
