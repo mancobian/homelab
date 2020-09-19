@@ -1,8 +1,12 @@
 #!/bin/bash
 
+# Populate environment variables
+cd "${0%/*}"
+source .env
+
 function destroy-vms {
     # Destroy K8s nodes
-    for file in cfg/*.cfg; do
+    for file in *.cfg; do
         source ${file}
         ssh ${PROXMOX_USER}@${PROXMOX_HOST} "qm stop ${VMID}; qm destroy ${VMID} --purge"
     done
