@@ -8,17 +8,27 @@ VERSION=0.0.1
 function do_setup() {
     # Copy installation files to the remote server
     rsync -arvzP \
+        ${CI_SSH_KEY_PATH}/${CI_PUBLIC_KEY_FILE} \
+        ${CI_SSH_KEY_PATH}/${CI_PRIVATE_KEY_FILE} \
         ${ROOTDIR}/.env \
         ${ROOTDIR}/cfg/ \
         ${ROOTDIR}/cmd/setup/ \
         ${PROXMOX_USER}@${PROXMOX_HOST}:${SERVER_ROOT_DIR}
 
-    # Create template VM on the remote server and cleanup
+    # Execute command on remote server
     ssh ${PROXMOX_USER}@${PROXMOX_HOST} "${SERVER_ROOT_DIR}/setup.sh; rm -rf ${SERVER_ROOT_DIR}"
 }
 
 function do_teardown() {
-    ${ROOTDIR}/cmd/teardown/teardown.sh
+    # Copy installation files to the remote server
+    rsync -arvzP \
+        ${ROOTDIR}/.env \
+        ${ROOTDIR}/cfg/ \
+        ${ROOTDIR}/cmd/teardown/ \
+        ${PROXMOX_USER}@${PROXMOX_HOST}:${SERVER_ROOT_DIR}
+
+    # Execute command on remote server
+    ssh ${PROXMOX_USER}@${PROXMOX_HOST} "${SERVER_ROOT_DIR}/teardown.sh; rm -rf ${SERVER_ROOT_DIR}"
 }
 
 function print_usage() {
