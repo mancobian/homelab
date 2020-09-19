@@ -2,6 +2,8 @@
 
 # https://engineerworkshop.com/blog/lvm-thin-provisioning-and-monitoring-storage-use-a-case-study/ - proxmox thin-provisioning
 # https://www.youtube.com/watch?v=8qwnXd1yRK4&ab_channel=LearnLinuxTV - cloud-init networking workaround
+# https://cloudinit.co/how-to-set-up-ssh-keys-on-ubuntu-18-04/ - ssh key management
+# https://www.linkedin.com/pulse/lost-ssh-key-cloud-init-answer-himanshoo-wadhwa/ - cloud-init ssh key recovery
 
 # Populate environment variables
 cd "${0%/*}"
@@ -35,6 +37,8 @@ function create-k8s-nodes {
         source ${file}
         qm status ${VMID}
         if [ $? -ne 0 ]; then
+            export CI_PUBLIC_KEY=`cat ${CI_PUBLIC_KEY_FILE}`
+            export CI_PRIVATE_KEY=`cat ${CI_PRIVATE_KEY_FILE} | sed 's/^/      /'`
             envsubst < user-data.yml > /var/lib/vz/snippets/user-data-${VMID}.yml
             qm clone ${TEMPLATE_VMID} ${VMID} \
                 --full false \
@@ -55,5 +59,40 @@ function create-k8s-nodes {
     done
 }
 
+function wait-for-guest-agents {
+    for file in *.cfg; do
+        source ${file}
+        until qm guest exec ${VMID} ping; do
+            echo "Waiting for guest agent on VM ID ${VMID}..."
+            sleep 2
+        done
+    done
+}
+
+function create-k8s-cluster {
+    local MASTER=""
+    local WORKERS=()
+
+    for file in *.cfg; do
+        source ${file}
+        case "${ROLE}" in
+            worker)
+                WORKERS+=(${HOSTNAME})
+                ;;
+            master)
+                MASTER=${HOSTNAME}
+                ;;
+            *)
+                ;; 
+        esac
+    done
+
+    for WORKER in ${WORKERS}; do
+        ssh -o 'StrictHostKeyChecking no' ${CI_USER}@${WORKER}.${SEARCH_DOMAIN} -- sudo $(ssh -o 'StrictHostKeyChecking no' ${CI_USER}@${MASTER}.${SEARCH_DOMAIN} sudo microk8s add-node | grep 'Join node with' | sed 's/Join node with: //' | tr -d '\n')
+    done
+}
+
 create-template-vm
 create-k8s-nodes
+wait-for-guest-agents
+create-k8s-cluster
