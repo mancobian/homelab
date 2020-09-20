@@ -36,3 +36,4 @@ Create a multi-node Kubernetes cluster on a single server in a [Proxmox Virtual 
 - LinkedIn, ["Lost SSH Key? Cloud-init is the answer"](https://www.linkedin.com/pulse/lost-ssh-key-cloud-init-answer-himanshoo-wadhwa/)
 - cloudinit.co, ["How to Set Up SSH Keys on Ubuntu 18.04"](https://cloudinit.co/how-to-set-up-ssh-keys-on-ubuntu-18-04/)
 - learnk8s.com, ["Architecting Kubernetes clusters — choosing a worker node size"](https://learnk8s.io/kubernetes-node-size)
+- yetiops.net, ["Using Terraform and Cloud-Init to deploy and automatically monitor Proxmox instances"](https://yetiops.net/posts/proxmox-terraform-cloudinit-saltstack-prometheus/#creating-a-template)
