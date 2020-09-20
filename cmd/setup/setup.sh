@@ -57,9 +57,9 @@ function create-k8s-nodes {
 function wait-for-guest-agents {
     for file in *.cfg; do
         source ${file}
+        echo "Waiting for guest agent on VM ID ${VMID}..."
         until qm guest exec ${VMID} ping; do
-            echo "Waiting for guest agent on VM ID ${VMID}..."
-            sleep 2
+            sleep 1
         done
     done
 }
