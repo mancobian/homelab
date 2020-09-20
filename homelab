@@ -54,3 +54,4 @@ teardown)
     print_usage
     ;;
 esac
+exit 1
