@@ -27,6 +27,7 @@ Create a multi-node Kubernetes cluster on a single server in a [Proxmox Virtual 
 
 # Commands
 - `make install` - Install `homelab` 
+- `make uninstall` - Remove `homelab` 
 - `homelab setup` - Setup `homelab` resources
 - `homelab teardown` - Teardown `homelab` resources
 
