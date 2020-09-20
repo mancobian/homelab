@@ -10,7 +10,7 @@ function do_setup() {
         ${CI_SSH_KEY_PATH}/${CI_PUBLIC_KEY_FILE} \
         ${CI_SSH_KEY_PATH}/${CI_PRIVATE_KEY_FILE} \
         ${ROOTDIR}/.env \
-        ${ROOTDIR}/cfg/ \
+        ${ROOTDIR}/proxmox/cfg/ \
         ${ROOTDIR}/cmd/setup/ \
         ${PROXMOX_USER}@${PROXMOX_HOST}:${SERVER_ROOT_DIR}
 
@@ -22,7 +22,7 @@ function do_teardown() {
     # Copy installation files to the remote server
     rsync -arvzP \
         ${ROOTDIR}/.env \
-        ${ROOTDIR}/cfg/ \
+        ${ROOTDIR}/proxmox/cfg/ \
         ${ROOTDIR}/cmd/teardown/ \
         ${PROXMOX_USER}@${PROXMOX_HOST}:${SERVER_ROOT_DIR}
 
