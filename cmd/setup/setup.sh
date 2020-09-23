@@ -44,6 +44,7 @@ function create-k8s-nodes {
                 --citype "nocloud" \
                 --nameserver "${NAME_SERVER}" \
                 --searchdomain "${SEARCH_DOMAIN}" \
+                --onboot 1 \
                 --ipconfig0 "ip=dhcp" \
                 --cicustom "user=local:snippets/user-data-${VMID}.yml" \
                 --cores ${CORES} \

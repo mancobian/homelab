@@ -1,16 +1,48 @@
 #!/bin/bash
 
 source ${ROOTDIR}/.env
-
 VERSION=0.0.1
+DEFAULT_CONFIG_DIR=~/.config/homelab
+
+function parse_args() {
+    while [[ $# -gt 0 ]]; do
+        ARG="$1"
+        case $ARG in
+        setup)
+            COMMAND="${COMMAND:-do_setup}"
+            shift
+            ;;
+        teardown)
+            COMMAND="${COMMAND:-do_teardown}"
+            shift
+            ;;
+        -c|--config-dir)
+            CONFIG_DIR="$2"
+            shift 2
+            ;;
+        *)
+            shift
+            ;;
+        esac
+    done
+
+    if [ -z ${COMMAND} ]; then
+        print_usage
+    fi
+
+    CONFIG_DIR=${CONFIG_DIR:-$DEFAULT_CONFIG_DIR}
+    if [ ! -d ${CONFIG_DIR} ]; then
+        print_usage
+    fi
+}
 
 function do_setup() {
     # Copy installation files to the remote server
     rsync -arvzP \
         ${CI_SSH_KEY_PATH}/${CI_PUBLIC_KEY_FILE} \
         ${CI_SSH_KEY_PATH}/${CI_PRIVATE_KEY_FILE} \
+        ${CONFIG_DIR}/proxmox/ \
         ${ROOTDIR}/.env \
-        ${ROOTDIR}/proxmox/cfg/ \
         ${ROOTDIR}/cmd/setup/ \
         ${PROXMOX_USER}@${PROXMOX_HOST}:${SERVER_ROOT_DIR}
 
@@ -21,8 +53,8 @@ function do_setup() {
 function do_teardown() {
     # Copy installation files to the remote server
     rsync -arvzP \
+        ${CONFIG_DIR}/proxmox/ \
         ${ROOTDIR}/.env \
-        ${ROOTDIR}/proxmox/cfg/ \
         ${ROOTDIR}/cmd/teardown/ \
         ${PROXMOX_USER}@${PROXMOX_HOST}:${SERVER_ROOT_DIR}
 
@@ -33,25 +65,8 @@ function do_teardown() {
 function print_usage() {
     echo "Homelab v${VERSION}"
     echo "Usage: $(basename "$0") [setup|teardown]" 
-    exit 0
+    exit 1
 }
 
-ARGV=$@
-if [ "x$ARGV" = "x" ]; then
-    ARGV="-h"
-fi
-
-case $ARGV in
-setup)
-    do_setup
-    exit 0
-    ;;
-teardown)
-    do_teardown
-    exit 0
-    ;;
-*)
-    print_usage
-    ;;
-esac
-exit 1
+parse_args $@
+$COMMAND 
