@@ -19,12 +19,11 @@ install: deps homelab
 	@mkdir -p $(ROOTDIR)
 	@cp .env $(ROOTDIR)
 	@cp -R cmd $(ROOTDIR)
-	@mkdir -p ${CONFIG_DIR}
-	@cp -R cfg/ ${CONFIG_DIR}
+	@ln -s ${PWD}/cfg ${CONFIG_DIR}
 
 .PHONY: uninstall
 uninstall: export ROOTDIR = $(DESTDIR)$(PREFIX)/opt/homelab
 uninstall:
 	@rm -f $(DESTDIR)$(PREFIX)/bin/homelab
 	@rm -rf $(ROOTDIR)
-	@rm -rf ${CONFIG_DIR}
+	@unlink ${CONFIG_DIR}
