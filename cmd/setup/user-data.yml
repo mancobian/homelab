@@ -11,7 +11,8 @@ packages:
 runcmd:
   - systemctl start qemu-guest-agent
   - netplan apply
-  - chown -R ${CI_USER}:${CI_USER} /home/${CI_USER}/.ssh
+  - chown -R ${CI_USER}:${CI_USER} /home/${CI_USER}
+  - usermod -aG microk8s ${CI_USER}
 snap:
   commands:
     - snap install microk8s --classic --channel=1.18/stable
