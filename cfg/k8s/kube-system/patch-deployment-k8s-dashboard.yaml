@@ -1,0 +1,9 @@
+spec:
+  template:
+    spec:
+      containers:
+      - name: kubernetes-dashboard
+        args:
+        - --auto-generate-certificates
+        - --namespace=kube-system
+        - --enable-skip-login

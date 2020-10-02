@@ -1,0 +1,20 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: microbot-ingress
+spec:
+  rules:
+  - host: microbot.kludge.city
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: microbot-service
+          servicePort: 80
+  - host: k8s.kludge.city
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: kubernetes-dashboard
+          servicePort: 80

@@ -86,6 +86,7 @@ function create-k8s-cluster {
         esac
     done
 
+    # Join K8s worker nodes to K8s master
     ssh-keygen -f ~/.ssh/known_hosts -R ${MASTER}.${SEARCH_DOMAIN}
     for NODE in ${NODES[@]}; do
         ssh-keygen -f ~/.ssh/known_hosts -R ${NODE}.${SEARCH_DOMAIN}

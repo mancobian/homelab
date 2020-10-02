@@ -1,6 +1,7 @@
 #!/bin/bash
 
 source ${ROOTDIR}/.env
+source ${ROOTDIR}/lib/utils.sh
 VERSION=0.0.1
 DEFAULT_CONFIG_DIR=~/.config/homelab
 
@@ -14,6 +15,10 @@ function parse_args() {
             ;;
         teardown)
             COMMAND="${COMMAND:-do_teardown}"
+            shift
+            ;;
+        kapply)
+            COMMAND="${COMMAND:-do_kapply}"
             shift
             ;;
         -c|--config-dir)
@@ -37,7 +42,7 @@ function parse_args() {
 }
 
 function do_setup() {
-    # Copy installation files to the remote server
+    # Copy installation files to the Proxmox server
     rsync -arvzP \
         ${CI_SSH_KEY_PATH}/${CI_PUBLIC_KEY_FILE} \
         ${CI_SSH_KEY_PATH}/${CI_PRIVATE_KEY_FILE} \
@@ -46,8 +51,15 @@ function do_setup() {
         ${ROOTDIR}/cmd/setup/ \
         ${PROXMOX_USER}@${PROXMOX_HOST}:${SERVER_ROOT_DIR}
 
-    # Execute command on remote server
-    ssh ${PROXMOX_USER}@${PROXMOX_HOST} "${SERVER_ROOT_DIR}/setup.sh; rm -rf ${SERVER_ROOT_DIR}"
+    # Execute command on Proxmox server
+    ssh ${PROXMOX_USER}@${PROXMOX_HOST} "${SERVER_ROOT_DIR}/proxmox-setup.sh; rm -rf ${SERVER_ROOT_DIR}"
+
+    # Generate K8s dashboard certs on K8s master
+    K8S_MASTER="$(get_k8s_master_hostname)"
+    ssh -o 'StrictHostKeyChecking no' ${CI_USER}@${K8S_MASTER}.${SEARCH_DOMAIN} 'bash -s' < ${ROOTDIR}/cmd/setup/generate-k8s-dashboard-certs.sh
+
+    # Enable microk8s plugins
+    ssh -o 'StrictHostKeyChecking no' ${CI_USER}@${K8S_MASTER}.${SEARCH_DOMAIN} "microk8s enable dashboard dns ingress metallb:${K8S_LB_IP_RANGE}"
 }
 
 function do_teardown() {
@@ -58,8 +70,20 @@ function do_teardown() {
         ${ROOTDIR}/cmd/teardown/ \
         ${PROXMOX_USER}@${PROXMOX_HOST}:${SERVER_ROOT_DIR}
 
-    # Execute command on remote server
-    ssh ${PROXMOX_USER}@${PROXMOX_HOST} "${SERVER_ROOT_DIR}/teardown.sh; rm -rf ${SERVER_ROOT_DIR}"
+    # Execute command on Proxmos server
+    ssh ${PROXMOX_USER}@${PROXMOX_HOST} "${SERVER_ROOT_DIR}/proxmox-teardown.sh; rm -rf ${SERVER_ROOT_DIR}"
+}
+
+function do_kapply() {
+    K8S_MASTER="$(get_k8s_master_hostname)"
+
+    # Copy k8s files to the remote server
+    rsync -arvzP \
+        ${CONFIG_DIR}/k8s/ \
+        ${CI_USER}@${K8S_MASTER}:${SERVER_ROOT_DIR}
+
+    # Apply k8s files on the remote server
+    ssh -o 'StrictHostKeyChecking no' ${CI_USER}@${K8S_MASTER}.${SEARCH_DOMAIN} "cd ${SERVER_ROOT_DIR}; microk8s kubectl apply -f . -R"
 }
 
 function print_usage() {

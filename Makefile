@@ -18,7 +18,8 @@ install: deps homelab
 	@chmod +x $(DESTDIR)$(PREFIX)/bin/homelab
 	@mkdir -p $(ROOTDIR)
 	@cp .env $(ROOTDIR)
-	@cp -R cmd $(ROOTDIR)
+	@cp -R cmd lib $(ROOTDIR)
+	@rm -rf ${CONFIG_DIR}
 	@ln -s ${PWD}/cfg ${CONFIG_DIR}
 
 .PHONY: uninstall
