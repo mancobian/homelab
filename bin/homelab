@@ -1,0 +1,62 @@
+#!/bin/bash
+
+BIN_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+source ${BIN_DIR}/../.env
+source ${BIN_DIR}/../lib/utils.sh
+
+VERSION=0.0.1
+
+function parse_args() {
+    while [[ $# -gt 0 ]]; do
+        ARG="$1"
+        case $ARG in
+        setup)
+            COMMAND="${COMMAND:-do_setup}"
+            shift
+            ;;
+        teardown)
+            COMMAND="${COMMAND:-do_teardown}"
+            shift
+            ;;
+        *)
+            shift
+            ;;
+        esac
+    done
+
+    if [ -z ${COMMAND} ]; then
+        print_usage
+    fi
+}
+
+function do_setup() {
+    # Copy script resources to Proxmox server
+    prep_proxmox_server
+
+    # Execute command on Proxmox server
+    ssh ${PROXMOX_USER}@${PROXMOX_HOST} "source ${REMOTE_INSTALL_DIR}/.env && ${REMOTE_INSTALL_DIR}/cmd/setup/proxmox-setup.sh; rm -rf ${REMOTE_INSTALL_DIR} && rf -rf ${REMOTE_CONFIG_DIR}"
+
+    # Generate K8s dashboard certs on K8s master
+    K8S_MASTER="$(get_k8s_master_hostname)"
+    ssh -o 'StrictHostKeyChecking no' ${CI_USER}@${K8S_MASTER}.${SEARCH_DOMAIN} 'bash -s' < ${INSTALL_DIR}/cmd/setup/generate-k8s-dashboard-certs.sh
+
+    # Enable microk8s plugins on K8s master
+    ssh -o 'StrictHostKeyChecking no' ${CI_USER}@${K8S_MASTER}.${SEARCH_DOMAIN} "microk8s enable dashboard dns ingress metallb:${K8S_LB_IP_RANGE}"
+}
+
+function do_teardown() {
+    # Copy script resources to Proxmox server
+    prep_proxmox_server
+
+    # Execute command on Proxmos server
+    ssh ${PROXMOX_USER}@${PROXMOX_HOST} "source ${REMOTE_INSTALL_DIR}/.env && ${REMOTE_INSTALL_DIR}/cmd/teardown/proxmox-teardown.sh; rm -rf ${REMOTE_INSTALL_DIR}"
+}
+
+function print_usage() {
+    echo "Homelab v${VERSION}"
+    echo "Usage: $(basename "$0") [setup|teardown]" 
+    exit 1
+}
+
+parse_args $@
+$COMMAND $COMMAND_ARGS

@@ -1,8 +1,5 @@
 #!/bin/bash
-
-# Populate environment variables
-cd "${0%/*}"
-source .env
+# NOTE: Requires that environment variable are sourced before being called.
 
 function create-template-vm {
     if [ ! -f /tmp/${UBUNTU_RELEASE}.img ]; then
@@ -28,13 +25,13 @@ function create-template-vm {
 }
 
 function create-k8s-nodes {
-    for file in *.cfg; do
+    for file in ${REMOTE_CONFIG_DIR}/proxmox/*.cfg; do
         source ${file}
         qm status ${VMID}
         if [ $? -ne 0 ]; then
-            export CI_PUBLIC_KEY=`cat ${CI_PUBLIC_KEY_FILE}`
-            export CI_PRIVATE_KEY=`cat ${CI_PRIVATE_KEY_FILE} | sed 's/^/      /'`
-            envsubst < user-data.yml > /var/lib/vz/snippets/user-data-${VMID}.yml
+            export CI_PUBLIC_KEY=`cat ${REMOTE_INSTALL_DIR}/${CI_PUBLIC_KEY_FILE}`
+            export CI_PRIVATE_KEY=`cat ${REMOTE_INSTALL_DIR}/${CI_PRIVATE_KEY_FILE} | sed 's/^/      /'`
+            envsubst < ${REMOTE_INSTALL_DIR}/cmd/setup/user-data.yml > /var/lib/vz/snippets/user-data-${VMID}.yml
             qm clone ${TEMPLATE_VMID} ${VMID} \
                 --full false \
                 --name ${HOSTNAME}; 
@@ -56,7 +53,7 @@ function create-k8s-nodes {
 }
 
 function wait-for-guest-agents {
-    for file in *.cfg; do
+    for file in ${REMOTE_CONFIG_DIR}/proxmox/*.cfg; do
         source ${file}
         echo "Waiting for guest agent on VM ID ${VMID}..."
         until qm guest exec ${VMID} ping; do
@@ -69,7 +66,7 @@ function create-k8s-cluster {
     local MASTER=""
     local NODES=()
 
-    for file in *.cfg; do
+    for file in ${REMOTE_CONFIG_DIR}/proxmox/*.cfg; do
         source ${file}
         case "${ROLE}" in
             data)
