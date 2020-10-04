@@ -10,12 +10,12 @@ function prep_k8s_master() {
 
     # Copy k8s files to the remote server
     rsync -e "ssh -o StrictHostKeyChecking=no" \
-        -aqrvzP ${CONFIG_DIR}/k8s/ \
+        --delete -aqrvzP ${CONFIG_DIR}/ \
         ${CI_USER}@${K8S_MASTER}.${SEARCH_DOMAIN}:${REMOTE_CONFIG_DIR}
 
     # Copy environment file to the remote server
     rsync -e "ssh -o StrictHostKeyChecking=no" \
-        -aqrvzP ${INSTALL_DIR}/.env \
+        --delete -aqrvzP ${INSTALL_DIR}/.env \
         ${CI_USER}@${K8S_MASTER}.${SEARCH_DOMAIN}:${REMOTE_INSTALL_DIR}
 }
 
@@ -25,11 +25,11 @@ function prep_proxmox_server() {
 
     # Copy config files to the Proxmox server
     rsync --exclude .git \
-        -aqrvzP ${CONFIG_DIR}/ \
+        --delete -aqrvzP ${CONFIG_DIR}/ \
         ${PROXMOX_USER}@${PROXMOX_HOST}.${SEARCH_DOMAIN}:${REMOTE_CONFIG_DIR}
 
     # Copy homelab files to the Proxmox server
-    rsync -aqrvzP ${INSTALL_DIR}/ \
+    rsync --delete -aqrvzP ${INSTALL_DIR}/ \
         ${CI_SSH_KEY_PATH}/${CI_PUBLIC_KEY_FILE} \
         ${CI_SSH_KEY_PATH}/${CI_PRIVATE_KEY_FILE} \
         ${PROXMOX_USER}@${PROXMOX_HOST}.${SEARCH_DOMAIN}:${REMOTE_INSTALL_DIR}
