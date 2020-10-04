@@ -30,6 +30,7 @@ Create a multi-node Kubernetes cluster on a single server in a [Proxmox Virtual 
 - `make uninstall` - Remove `homelab` 
 - `homelab setup` - Setup `homelab` resources
 - `homelab teardown` - Teardown `homelab` resources
+- `homelab kubectl` - Execute a `kubectl` command on the K8s cluster master node
 
 # References
 - The Engineer's Workshop, ["LVM, Thin Provisioning, and Monitoring Storage Use: A Case Study"](https://engineerworkshop.com/blog/lvm-thin-provisioning-and-monitoring-storage-use-a-case-study/)
