@@ -87,7 +87,7 @@ function create-k8s-cluster {
     ssh-keygen -f ~/.ssh/known_hosts -R ${MASTER}.${SEARCH_DOMAIN}
     for NODE in ${NODES[@]}; do
         ssh-keygen -f ~/.ssh/known_hosts -R ${NODE}.${SEARCH_DOMAIN}
-        ssh -o 'StrictHostKeyChecking no' ${CI_USER}@${NODE}.${SEARCH_DOMAIN} -- sudo $(ssh -o 'StrictHostKeyChecking no' ${CI_USER}@${MASTER}.${SEARCH_DOMAIN} sudo microk8s add-node | grep 'Join node with' | sed 's/Join node with: //' | tr -d '\n')
+        ssh -qo 'StrictHostKeyChecking no' ${CI_USER}@${NODE}.${SEARCH_DOMAIN} -- sudo $(ssh -o 'StrictHostKeyChecking no' ${CI_USER}@${MASTER}.${SEARCH_DOMAIN} sudo microk8s add-node | grep 'Join node with' | sed 's/Join node with: //' | tr -d '\n')
     done
 }
 
