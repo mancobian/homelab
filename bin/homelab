@@ -18,6 +18,12 @@ function parse_args() {
             COMMAND="${COMMAND:-do_teardown}"
             shift
             ;;
+        kubectl)
+            COMMAND="${COMMAND:-do_kubectl}"
+            shift
+            COMMAND_ARGS="$@"
+            break
+            ;;
         *)
             shift
             ;;
@@ -50,6 +56,15 @@ function do_teardown() {
 
     # Execute command on Proxmos server
     ssh ${PROXMOX_USER}@${PROXMOX_HOST} "source ${REMOTE_INSTALL_DIR}/.env && ${REMOTE_INSTALL_DIR}/cmd/teardown/proxmox-teardown.sh; rm -rf ${REMOTE_INSTALL_DIR}"
+}
+
+# NOTE: Single-quote commands that should be executed on the remote server, e.g. `cat`-ing YAML excerpts for `patch` commands
+# NOTE: Use the remote path for files passed to `kubectl` commands
+# EXAMPLE: homelab kubectl patch deployment kubernetes-dashboard -n kube-system --patch '$(cat ${REMOTE_CONFIG_DIR}/kube-system/patch-deployment-k8s-dashboard.yaml)'
+function do_kubectl() {
+    prep_k8s_master
+    local QUOTED_ARGS=$(echo $@ | sed -e "s/\$\(.*\)/\"\$\1\"/g")
+    ssh -o 'StrictHostKeyChecking no' ${CI_USER}@${K8S_MASTER}.${SEARCH_DOMAIN} "source ${REMOTE_INSTALL_DIR}/.env && microk8s kubectl ${QUOTED_ARGS}"
 }
 
 function print_usage() {
