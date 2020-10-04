@@ -2,7 +2,7 @@
 hostname: ${HOSTNAME}
 manage_etc_hosts: false
 package_upgrade: true
-fqdn: ${HOSTNAME}.kludge.city
+fqdn: ${HOSTNAME}.${SEARCH_DOMAIN}
 chpasswd:
   expire: False
 packages:
